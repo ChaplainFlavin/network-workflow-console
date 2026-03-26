@@ -1,0 +1,42 @@
+{
+  "profiles": {
+    "studio": {
+      "miniHost": "",
+      "proxy": {
+        "type": "http",
+        "host": "",
+        "port": 6152
+      }
+    },
+    "travel": {
+      "miniHost": "",
+      "proxy": {
+        "type": "http",
+        "host": "",
+        "port": 6152
+      }
+    }
+  },
+  "expectedRegion": "JP",
+  "expectedCountryName": "Japan",
+  "verifyEndpoints": [
+    "https://api.ip.sb/geoip",
+    "https://ifconfig.co/json"
+  ],
+  "timeouts": {
+    "tcpMs": 1500,
+    "httpMs": 5000,
+    "verifyTotalMs": 10000
+  },
+  "noProxy": [
+    "localhost",
+    "127.0.0.1",
+    "::1",
+    ".local"
+  ],
+  "privateNetworksHint": [
+    "10.0.0.0/8",
+    "172.16.0.0/12",
+    "192.168.0.0/16"
+  ]
+}

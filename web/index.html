@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Network Workflow Console</title>
+    <link rel="stylesheet" href="/app.css" />
+  </head>
+  <body>
+    <div class="shell">
+      <header class="hero">
+        <div class="hero-copy-wrap">
+          <p class="eyebrow">Network Workflow Console</p>
+          <h1>网络工作流控制台</h1>
+          <p class="hero-copy">先看结论，再切模式。配置和诊断已收进高级区。</p>
+        </div>
+        <div class="summary-panel">
+          <span class="summary-label">当前结论</span>
+          <strong id="summaryText">未验证</strong>
+          <span id="summaryTime" class="muted">等待首次刷新</span>
+        </div>
+      </header>
+
+      <main class="main-stack">
+        <section class="card action-card">
+          <div class="card-head">
+            <div>
+              <h2>模式切换</h2>
+              <p class="muted">工作室代理、工作室直连、外出和保底模式</p>
+            </div>
+            <span id="busyState" class="muted">空闲</span>
+          </div>
+          <div class="actions actions-compact">
+            <button data-mode="normal">默认直连</button>
+            <button data-mode="studio">工作室代理</button>
+            <button data-mode="studio_direct">工作室直连</button>
+            <button data-mode="travel">外出</button>
+            <button data-mode="fallback">临时保底</button>
+            <button id="verifyButton" class="primary">快速验证</button>
+          </div>
+          <p id="actionResult" class="status-line">等待操作</p>
+        </section>
+
+        <section class="quick-grid">
+          <article class="quick-card">
+            <span class="quick-label">当前模式</span>
+            <strong id="modeBadge">-</strong>
+            <span id="modeChangedAt" class="muted">-</span>
+          </article>
+          <article class="quick-card">
+            <span class="quick-label">链路路径</span>
+            <strong id="routeMode">-</strong>
+            <span id="connectionProfile" class="muted">-</span>
+          </article>
+          <article class="quick-card">
+            <span class="quick-label">关键操作建议</span>
+            <strong id="criticalOps">-</strong>
+            <span id="devProxyPolicy" class="muted">-</span>
+          </article>
+          <article class="quick-card">
+            <span class="quick-label">浏览器提示</span>
+            <strong id="browserNotice">-</strong>
+            <span class="muted">浏览器代理仍手工控制</span>
+          </article>
+        </section>
+
+        <section class="primary-grid">
+          <section class="card">
+            <div class="card-head">
+              <h2>链路状态</h2>
+              <span class="muted">本地快速状态</span>
+            </div>
+            <div class="signal-grid">
+              <article class="signal-card">
+                <span class="signal-label">Tailscale</span>
+                <strong id="tailscaleState">-</strong>
+              </article>
+              <article class="signal-card">
+                <span class="signal-label">mini</span>
+                <strong id="miniReachable">-</strong>
+              </article>
+              <article class="signal-card">
+                <span class="signal-label">代理端口</span>
+                <strong id="proxyReachable">-</strong>
+              </article>
+              <article class="signal-card">
+                <span class="signal-label">代理类型</span>
+                <strong id="proxyType">-</strong>
+              </article>
+            </div>
+          </section>
+
+          <section class="card egress-card">
+            <div class="card-head">
+              <h2>出口状态</h2>
+              <span class="muted">最近一次完整验证</span>
+            </div>
+            <div class="egress-grid">
+              <div class="egress-box">
+                <h3>直连出口</h3>
+                <p id="directEgressText" class="egress-copy">未验证</p>
+                <p id="directEgressMeta" class="muted">-</p>
+              </div>
+              <div class="egress-box accent">
+                <h3>代理出口</h3>
+                <p id="proxiedEgressText" class="egress-copy">未验证</p>
+                <p id="proxiedEgressMeta" class="muted">-</p>
+              </div>
+            </div>
+          </section>
+        </section>
+
+        <section class="card">
+          <div class="card-head">
+            <h2>验证结果</h2>
+            <span class="muted">最近一次检查明细</span>
+          </div>
+          <ul id="checksList" class="checks-list"></ul>
+          <div id="verifyErrors" class="error-stack"></div>
+        </section>
+
+        <details class="details-card">
+          <summary>高级信息：应用控制</summary>
+          <div class="details-body">
+            <section class="card inner-card">
+              <div class="card-head">
+                <h2>应用控制</h2>
+                <span class="muted">GUI 动作会重启应用</span>
+              </div>
+              <div class="signal-grid app-grid">
+                <article class="signal-card">
+                  <span class="signal-label">控制台服务</span>
+                  <strong id="appServiceStatus">-</strong>
+                </article>
+                <article class="signal-card">
+                  <span class="signal-label">GUI 代理环境</span>
+                  <strong id="guiProxyStatus">-</strong>
+                </article>
+                <article class="signal-card">
+                  <span class="signal-label">Codex</span>
+                  <strong id="codexAppStatus">-</strong>
+                </article>
+                <article class="signal-card">
+                  <span class="signal-label">Antigravity</span>
+                  <strong id="antigravityAppStatus">-</strong>
+                </article>
+              </div>
+              <dl class="kv app-kv">
+                <div>
+                  <dt>当前 GUI 代理</dt>
+                  <dd id="guiProxyValue">-</dd>
+                </div>
+                <div>
+                  <dt>说明</dt>
+                  <dd id="appControlNotes">-</dd>
+                </div>
+              </dl>
+              <div class="actions app-actions">
+                <button id="enableGuiProxyButton" class="secondary">代理启动 Codex+Antigravity</button>
+                <button id="disableGuiProxyButton">恢复普通 Codex+Antigravity</button>
+                <button id="stopConsoleButton">关闭控制台服务</button>
+              </div>
+              <p id="appActionResult" class="status-line">等待操作</p>
+            </section>
+          </div>
+        </details>
+
+        <details class="details-card">
+          <summary>高级信息：代理与配置</summary>
+          <div class="details-body">
+            <section class="card inner-card">
+              <div class="card-head">
+                <h2>开发代理</h2>
+                <span id="devProxySession" class="badge subtle">unknown</span>
+              </div>
+              <dl class="kv">
+                <div>
+                  <dt>模板文件</dt>
+                  <dd id="devProxyEnvPath">-</dd>
+                </div>
+                <div>
+                  <dt>代理终端脚本</dt>
+                  <dd id="devProxyShellPath">-</dd>
+                </div>
+                <div>
+                  <dt>推荐加载命令</dt>
+                  <dd><code id="devProxyCommand">-</code></dd>
+                </div>
+              </dl>
+            </section>
+
+            <section class="card inner-card">
+              <div class="card-head">
+                <h2>配置</h2>
+                <span class="muted">本地保存</span>
+              </div>
+              <form id="configForm" class="config-form">
+                <label>
+                  <span>studio mini host</span>
+                  <input name="studioMiniHost" type="text" placeholder="192.168.x.x" />
+                </label>
+                <label>
+                  <span>studio proxy host</span>
+                  <input name="studioProxyHost" type="text" placeholder="192.168.x.x" />
+                </label>
+                <label>
+                  <span>studio proxy port</span>
+                  <input name="studioProxyPort" type="number" min="1" placeholder="6152" />
+                </label>
+                <label>
+                  <span>studio proxy type</span>
+                  <select name="studioProxyType">
+                    <option value="http">http</option>
+                    <option value="socks5">socks5</option>
+                  </select>
+                </label>
+                <label>
+                  <span>travel mini host</span>
+                  <input name="travelMiniHost" type="text" placeholder="100.x.x.x" />
+                </label>
+                <label>
+                  <span>travel proxy host</span>
+                  <input name="travelProxyHost" type="text" placeholder="100.x.x.x" />
+                </label>
+                <label>
+                  <span>travel proxy port</span>
+                  <input name="travelProxyPort" type="number" min="1" placeholder="6152" />
+                </label>
+                <label>
+                  <span>travel proxy type</span>
+                  <select name="travelProxyType">
+                    <option value="http">http</option>
+                    <option value="socks5">socks5</option>
+                  </select>
+                </label>
+                <label>
+                  <span>expected region</span>
+                  <input name="expectedRegion" type="text" maxlength="2" placeholder="JP" />
+                </label>
+                <button type="submit" class="secondary">保存配置</button>
+              </form>
+            </section>
+          </div>
+        </details>
+
+        <details class="details-card">
+          <summary>高级信息：诊断日志</summary>
+          <div class="details-body">
+            <section class="card inner-card">
+              <div class="card-head">
+                <h2>最近事件</h2>
+                <span class="muted">最近 50 条</span>
+              </div>
+              <div id="logsList" class="logs-list"></div>
+            </section>
+          </div>
+        </details>
+      </main>
+    </div>
+    <script src="/app.js"></script>
+  </body>
+</html>
