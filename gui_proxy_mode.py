@@ -6,13 +6,26 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parent
-CONFIG_PATH = ROOT / "config" / "default.json"
+DEFAULT_CONFIG_PATH = ROOT / "config" / "default.json"
+LOCAL_CONFIG_PATH = ROOT / "config" / "local.json"
 STATE_PATH = ROOT / "data" / "state.json"
 
 
 def read_json(path):
+    if not path.exists():
+        return {}
     with path.open("r", encoding="utf-8") as fh:
         return json.load(fh)
+
+
+def deep_merge(base, overlay):
+    merged = dict(base)
+    for key, value in overlay.items():
+        if isinstance(merged.get(key), dict) and isinstance(value, dict):
+            merged[key] = deep_merge(merged[key], value)
+        else:
+            merged[key] = value
+    return merged
 
 
 def resolve_profile(mode):
@@ -35,7 +48,7 @@ def proxy_url(profile):
 
 def main():
     forced_profile = sys.argv[1] if len(sys.argv) > 1 else ""
-    config = read_json(CONFIG_PATH)
+    config = deep_merge(read_json(DEFAULT_CONFIG_PATH), read_json(LOCAL_CONFIG_PATH))
     state = read_json(STATE_PATH)
     active_mode = state.get("networkMode", "studio")
     profile_name = forced_profile or resolve_profile(active_mode)
