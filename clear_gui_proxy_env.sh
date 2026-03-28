@@ -15,5 +15,5 @@ tell application "Antigravity" to quit
 delay 1
 EOF
 
-open -na "$CODEX_APP"
-open -na "$ANTIGRAVITY_APP"
+open -a "$CODEX_APP"
+open -a "$ANTIGRAVITY_APP"

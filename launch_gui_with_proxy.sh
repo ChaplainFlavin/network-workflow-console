@@ -23,5 +23,5 @@ tell application "Antigravity" to quit
 delay 1
 EOF
 
-open -na "$CODEX_APP" --args "--proxy-server=$PROXY_URL" "--proxy-bypass-list=$BYPASS_LIST"
-open -na "$ANTIGRAVITY_APP" --args "--proxy-server=$PROXY_URL" "--proxy-bypass-list=$BYPASS_LIST"
+open -a "$CODEX_APP" --args "--proxy-server=$PROXY_URL" "--proxy-bypass-list=$BYPASS_LIST"
+open -a "$ANTIGRAVITY_APP" --args "--proxy-server=$PROXY_URL" "--proxy-bypass-list=$BYPASS_LIST"
